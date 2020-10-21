@@ -1,0 +1,103 @@
+{
+    "$schema": "https://vega.github.io/schema/vega/v5.json",
+    "description": "Graphical visualization of COVID-19 cases in a decisive area (county) of Austria.",
+    "width": 1500,
+    "height": 750,
+    "padding": 5,
+    "config": {
+      "title": {
+        "fontSize": 24
+      }
+    },
+    "title": {
+      "text": ""
+    },
+  
+    "data": [
+      {
+        "name": "table",
+        "values": [
+          {"date": 1875, "cases": 1309}
+        ]
+      },
+      {
+        "name": "tableCut",
+        "values": [
+          {"date": 1875, "cases": 1309}
+        ]
+      }
+    ],
+  
+    "scales": [
+      {
+        "name": "x",
+        "type": "linear",
+        "range": "width",
+        "zero": false,
+        "domain": {"data": "table", "field": "date"}
+      },
+      {
+        "name": "y",
+        "type": "linear",
+        "range": "height",
+        "nice": true,
+        "zero": true,
+        "domain": {"data": "table", "field": "cases"}
+      }
+    ],
+  
+    "axes": [
+      {
+        "orient": "left",
+        "scale": "y",
+        "title": "",
+        "titleFontSize": 18,
+        "titlePadding": 10,
+        "grid": true,
+        "labelFontSize": 14
+      },
+      {
+        "orient": "bottom",
+        "scale": "x",
+        "formatType": "utc",
+        "format": "%Y-%m-%d",
+        "title": "Date",
+        "titleFontSize": 18,
+        "tickCount": 25,
+        "tickOffset": 0,
+        "labelFontSize": 14,
+        "labelAngle": -35,
+        "labelAlign":"right"
+      }
+    ],
+  
+    "marks": [
+      {
+        "type": "line",
+        "from": {"data": "table"},
+        "encode": {
+          "enter": {
+            "interpolate": {"value": "monotone"},
+            "x": {"scale": "x", "field": "date"},
+            "y": {"scale": "y", "field": "cases"},
+            "stroke": {"value": "steelblue"},
+            "strokeWidth": {"value": 3}
+          }
+        }
+      },
+      {
+        "type": "symbol",
+        "from": {"data": "tableCut"},
+        "encode": {
+          "enter": {
+            "x": {"scale": "x", "field": "date"},
+            "y": {"scale": "y", "field": "cases"},
+            "stroke": {"value": "steelblue"},
+            "strokeWidth": {"value": 1.5},
+            "fill": {"value": "white"},
+            "size": {"value": 20}
+          }
+        }
+      }
+    ]
+  }
