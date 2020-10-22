@@ -22,11 +22,15 @@ const rl = readline.createInterface({
 fetch(API_BASE + 'info')
 .then(res => res.json())
 .then(async (json) => {
-    console.log("API Username: " + process.env.API_USERNAME);
+    if(!process.env.API_USERNAME){
+        console.log('!! No API_USERNAME specified in .env-file!')
+        process.exit(1);
+    }
+    console.log('API Username: ' + process.env.API_USERNAME);
     
     // Fetch tokens
     var tokens;
-    if(!process.env.API_REFRESH_TOKEN || !process.env.API_ACCESS_TOKEN){
+    if(!process.env.API_REFRESH_TOKEN){
         tokens = await obtainAPIKey().catch(err => {
             console.log(err);
             process.exit(1);
@@ -34,8 +38,7 @@ fetch(API_BASE + 'info')
         tokens = {accessToken: tokens.accessToken.token, refreshToken: tokens.refreshToken};
     }
     else{
-        tokenPairTmp = {accessToken: process.env.API_ACCESS_TOKEN, refreshToken: process.env.API_REFRESH_TOKEN};
-        tokens = await refreshKey(tokenPairTmp).catch(err => {
+        tokens = await refreshKey(process.env.API_USERNAME, process.env.API_REFRESH_TOKEN).catch(err => {
             console.log(err);
             process.exit(1);
         });
@@ -196,11 +199,11 @@ async function fetchAllBezirke(tokenPair) {
 }
 
 // Takes in a tokenPair and refreshes the access token.
-async function refreshKey(tokenPair) {
+async function refreshKey(userEmail, refreshToken) {
     return new Promise(async (resolve, reject) => {
         let status;
         fetch(USER_BASE + 'refreshToken', {method: 'POST',
-            body: JSON.stringify(tokenPair),
+            body: JSON.stringify({userEmail: userEmail, refreshToken: refreshToken}),
             headers: {
                 "Content-Type": "application/json"
             }
@@ -213,7 +216,7 @@ async function refreshKey(tokenPair) {
             if(!tokenJson || status != 200)
                 return reject('!! Couldn\'t refresh tokens!');
             else
-                return resolve({accessToken: tokenJson.accessToken.token, refreshToken: tokenPair.refreshToken});
+                return resolve({accessToken: tokenJson.accessToken.token, refreshToken: refreshToken});
         })
         .catch(err => {
             return reject(err);
@@ -240,7 +243,6 @@ async function obtainAPIKey() {
                 return res.json();
             })
             .then(tokenJson => {
-                console.log(status);
                 if(!tokenJson || tokenJson.error || status != 200)
                     return reject('!! Invalid password - could not obtain API key!' + (tokenJson.error ? ' Error: ' + tokenJson.error : ''));
 

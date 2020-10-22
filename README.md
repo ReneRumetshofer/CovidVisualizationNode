@@ -10,7 +10,6 @@ and generates SVG graphs based on this data.
 - Clone this repository and create a `.env` file in it. The following entries are needed:
 	- API_USERNAME: Username of the API user
 	- **OPTIONAL** (to not get queried for the API user's password every time):
-		- API_ACCESS_TOKEN: Any (previous) API access token
 		- API_REFRESH_TOKEN: The main API token for obtaining access tokens
 - Run `npm install`
 - Run the app: `npm start`
