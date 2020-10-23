@@ -4,13 +4,20 @@ const readline = require("readline");
 const fs = require('fs');
 const vega = require('vega');
 
-// Routes
-const API_BASE = 'https://www.ebimt.pro:5000/';
-const USER_BASE = API_BASE + 'user/';
-
 // CONSTANTS
-const BEZIRK_TO_FETCH = 'Amstetten';
+const API_BASE = 'https://www.ebimt.pro/covidApiAustria/';
+const USER_BASE = API_BASE + 'user/';
 const CUT_FACTOR = 3; // Determines how many data points are shown. If cut by two, only every 2nd dot will be graphed
+
+// Parse command line args
+const argv = process.argv.splice(2);
+if(argv.length != 1) {
+    console.error('No Bezirk name supplied!');
+    console.error('*Usage:\nnode visualize.js name');
+    console.error('\tname: Name of the Bezirk (county) for graph generation');
+    process.exit(1);
+}
+var bezirkName = argv[0];
 
 // Init console
 const rl = readline.createInterface({
@@ -36,10 +43,12 @@ fetch(API_BASE + 'info')
             process.exit(1);
         });
         tokens = {accessToken: tokens.accessToken.token, refreshToken: tokens.refreshToken};
+        console.log('Refresh token: ' + tokens.refreshToken);
     }
-    else{
-        tokens = await refreshKey(process.env.API_USERNAME, process.env.API_REFRESH_TOKEN).catch(err => {
+    else {
+        tokens = await refreshToken(process.env.API_USERNAME, process.env.API_REFRESH_TOKEN).catch(err => {
             console.log(err);
+            console.log('!! Invalid refresh token in .env file!');
             process.exit(1);
         });
     }
@@ -54,10 +63,14 @@ fetch(API_BASE + 'info')
     // Fetch statistic entries
     var bezirkModel;
     for(let i = 0; i < allBezirke.length; i++) {
-        if(allBezirke[i].name === BEZIRK_TO_FETCH){
+        if(allBezirke[i].name.toLowerCase() === bezirkName.toLowerCase()){
             bezirkModel = allBezirke[i];
             break;
         }
+    }
+    if(!bezirkModel){
+        console.log('Bezirk with name \'' + bezirkName + '\' can\'t be found!');
+        process.exit(1);
     }
     var statisticEntries = await fetchAllStatisticEntriesForBezirk(tokens, bezirkModel.gkz).catch(err => {
         console.log(err);
@@ -100,7 +113,9 @@ fetch(API_BASE + 'info')
             process.exit(0);
         });
 })
-.catch(err => console.log('!! No connection possible' + err));
+.catch(err =>{
+    console.log('!! No connection possible' + err);
+});
 
 // Writes a SVG graph.
 // title: Title above the whole graph
@@ -199,7 +214,7 @@ async function fetchAllBezirke(tokenPair) {
 }
 
 // Takes in a tokenPair and refreshes the access token.
-async function refreshKey(userEmail, refreshToken) {
+async function refreshToken(userEmail, refreshToken) {
     return new Promise(async (resolve, reject) => {
         let status;
         fetch(USER_BASE + 'refreshToken', {method: 'POST',
