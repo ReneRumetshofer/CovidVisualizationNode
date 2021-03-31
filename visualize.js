@@ -82,6 +82,7 @@ fetch(API_BASE + 'info')
     /** Graph the statistics **/
     // Prepare data sets
     const totalCases = [];
+    const newCases = [];
     const activeCases = [];
     const totalDeaths = [];
     const recoveredTotal = [];
@@ -95,7 +96,8 @@ fetch(API_BASE + 'info')
 
         totalDeaths.push({date: date, cases: statisticEntries[i].deathsTotal});
         recoveredTotal.push({date: date, cases: statisticEntries[i].recoveredTotal});
-        sevenDayIncidence.push({date: date, cases: statisticEntries[i].SevenDayIncidence})
+        sevenDayIncidence.push({date: date, cases: statisticEntries[i].SevenDayIncidence});
+        newCases.push({date: date, cases: statisticEntries[i].casesToday});
     }
 
     // Write graphs (SVG)
@@ -107,6 +109,8 @@ fetch(API_BASE + 'info')
         bezirkModel.name + '_total_deaths.svg', () => console.log('Deaths graph written.'));
     writeGraph("COVID-19 7-day-incidence in 'Bezirk " + bezirkModel.name + "' (absolute)", "7-day-incidence", sevenDayIncidence, CUT_FACTOR,
         bezirkModel.name + '_7_day_incidence.svg', () => console.log('7d incidence graph written.'));
+    writeGraph("Daily new COVID-19 cases in 'Bezirk " + bezirkModel.name + "' (absolute)", "Daily new cases (absolute)", newCases, CUT_FACTOR,
+        bezirkModel.name + '_daily_new_cases.svg', () => console.log('Daily new cases graph written.'));
     writeGraph("Recovered COVID-19 patients in 'Bezirk " + bezirkModel.name + "' (absolute)", "COVID-19 recovered count (absolute)", recoveredTotal, CUT_FACTOR,
         bezirkModel.name + '_recovered.svg', () => {
             console.log('Recovered graph written.');
@@ -115,6 +119,7 @@ fetch(API_BASE + 'info')
 })
 .catch(err =>{
     console.log('!! No connection possible' + err);
+    process.exit(1);
 });
 
 // Writes a SVG graph.
