@@ -7,7 +7,7 @@ const vega = require('vega');
 // CONSTANTS
 const API_BASE = 'https://www.ebimt.pro/covidApiAustria/';
 const USER_BASE = API_BASE + 'user/';
-const CUT_FACTOR = 3; // Determines how many data points are shown. If cut by two, only every 2nd dot will be graphed
+const CUT_FACTOR = 1; // Determines how many data points are shown. If cut by two, only every 2nd dot will be graphed
 
 // Parse command line args
 const argv = process.argv.splice(2);
